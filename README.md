@@ -1,36 +1,91 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Seven Bin
+
+A minimal pastebin clone where pastes automatically expire after 7 days. Built with Next.js, MongoDB, and Tailwind CSS.
+
+## Features
+
+- **Auto-expiring pastes** — All pastes are automatically deleted after 7 days via MongoDB TTL indexes
+- **Language detection** — Auto-detects the language of your paste with manual override
+- **Syntax highlighting** — Code is highlighted using Prism in the Night Owl theme
+- **My Pastes** — Tracks which pastes you created using localStorage
+- **Clone pastes** — Fork any paste into a new one with pre-filled content
+- **Copy to clipboard** — One-click copy for any paste
+
+## Tech Stack
+
+- [Next.js 16](https://nextjs.org/) (App Router, Server Actions)
+- [MongoDB](https://www.mongodb.com/) with [Mongoose](https://mongoosejs.com/)
+- [Tailwind CSS v4](https://tailwindcss.com/)
+- [Lucide React](https://lucide.dev/) for icons
+- [Prism React Renderer](https://github.com/FormidableLabs/prism-react-renderer) for syntax highlighting
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 26+
+- Docker (for MongoDB)
+
+### Setup
+
+1. Clone the repository:
+
+```bash
+git clone https://github.com/TiagoRibeiro25/seven-bin.git
+cd seven-bin
+```
+
+2. Start MongoDB:
+
+```bash
+docker compose up -d
+```
+
+3. Install dependencies:
+
+```bash
+npm install
+```
+
+4. Run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+5. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## How It Works
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Creating a paste**: Enter a title (optional), paste your code, select a language (or let auto-detect choose), and click "Create Secure Paste"
+- **Viewing a paste**: Share the URL with anyone. The paste shows syntax-highlighted code, expiry countdown, and metadata
+- **My Pastes**: Your created paste IDs are stored in localStorage so you can quickly find them later
+- **Auto-deletion**: MongoDB's TTL index on `expiresAt` automatically removes pastes 7 days after creation
 
-## Learn More
+## Project Structure
 
-To learn more about Next.js, take a look at the following resources:
+```
+src/
+├── app/
+│   ├── actions/paste.ts      # Server actions (create, read)
+│   ├── paste/[id]/page.tsx   # View paste page
+│   ├── pastes/page.tsx       # My Pastes page
+│   ├── page.tsx              # Home / create paste page
+│   ├── layout.tsx            # Root layout with header/footer
+│   └── globals.css           # Global styles
+├── components/
+│   ├── Header.tsx            # Navigation header
+│   └── Footer.tsx            # Site footer
+├── lib/
+│   ├── detect-language.ts    # Keyword-based language detection
+│   ├── localstorage.ts       # localStorage helpers for paste IDs
+│   └── mongoose.ts           # MongoDB connection
+└── models/
+    └── Paste.ts              # Mongoose Paste schema
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Environment Variables
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| Variable      | Description               | Default                                                           |
+| ------------- | ------------------------- | ----------------------------------------------------------------- |
+| `MONGODB_URI` | MongoDB connection string | `mongodb://admin:1234@localhost:27017/seven-bin?authSource=admin` |
