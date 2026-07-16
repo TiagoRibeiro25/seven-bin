@@ -1,65 +1,163 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
-  return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+import { Suspense, useState, useRef, useCallback } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Clock, Zap } from "lucide-react";
+import { createPaste } from "./actions/paste";
+import { addPasteId } from "@/lib/localstorage";
+import { LANGUAGES, type Language } from "@/lib/detect-language";
+
+const HomeForm: React.FC = () => {
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+    const [title, setTitle] = useState(() => searchParams.get("title") || "");
+    const [content, setContent] = useState(
+        () => searchParams.get("content") || "",
+    );
+    const [language, setLanguage] = useState<Language>(() => {
+        const lang = searchParams.get("language");
+        if (lang && LANGUAGES.includes(lang as Language)) {
+            return lang as Language;
+        }
+        return "auto";
+    });
+    const [submitting, setSubmitting] = useState(false);
+
+    const charCount = content.length;
+    const lineCount = content ? content.split("\n").length : 1;
+
+    const handleSubmit = useCallback(
+        async (e: React.FormEvent) => {
+            e.preventDefault();
+            if (!content.trim() || submitting) return;
+
+            setSubmitting(true);
+            try {
+                const result = await createPaste({
+                    title: title.trim(),
+                    content,
+                    language,
+                });
+                addPasteId(result.id);
+                router.push(`/paste/${result.id}`);
+            } catch (err) {
+                console.error("Failed to create paste:", err);
+            } finally {
+                setSubmitting(false);
+            }
+        },
+        [title, content, language, submitting, router],
+    );
+
+    return (
+        <div className="mx-auto max-w-6xl px-6 py-10">
+            <form onSubmit={handleSubmit}>
+                {/* Title row */}
+                <div className="mb-6">
+                    <label className="mb-2 block text-xs font-bold uppercase tracking-widest text-[#8b8598]">
+                        Paste Title
+                    </label>
+                    <div className="flex items-center gap-4">
+                        <input
+                            type="text"
+                            value={title}
+                            onChange={(e) => setTitle(e.target.value)}
+                            placeholder="Untitled Paste..."
+                            className="flex-1 rounded border border-[#2a2f48] bg-[#1a1f36] px-4 py-3 text-sm text-[#e2d5c8] placeholder-[#4a4f68] outline-none focus:border-[#e67e22]"
+                        />
+                        <div className="flex shrink-0 items-center gap-2 text-xs text-[#8b8598]">
+                            <Clock className="h-4 w-4" />
+                            <span className="uppercase tracking-wider">
+                                Expires after 7 days
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Language selector */}
+                <div className="mb-4 flex justify-end">
+                    <div className="flex items-center gap-2">
+                        <span className="text-xs text-[#8b8598]">
+                            Language:
+                        </span>
+                        <select
+                            value={language}
+                            onChange={(e) =>
+                                setLanguage(e.target.value as Language)
+                            }
+                            className="rounded border border-[#e67e22] bg-[#1a1f36] px-3 py-1.5 text-xs text-[#e67e22] outline-none"
+                        >
+                            {LANGUAGES.map((lang) => (
+                                <option key={lang} value={lang}>
+                                    {lang === "auto"
+                                        ? "Auto-detect"
+                                        : lang.charAt(0).toUpperCase() +
+                                          lang.slice(1)}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                </div>
+
+                {/* Content textarea */}
+                <div className="mb-8 rounded border border-[#2a2f48] bg-[#1a1f36]">
+                    <textarea
+                        ref={textareaRef}
+                        value={content}
+                        onChange={(e) => setContent(e.target.value)}
+                        placeholder={`// Paste your code or text here...\n// All data is encrypted and expires automatically.`}
+                        className="min-h-75 w-full resize-y bg-transparent p-4 font-mono text-sm text-[#e2d5c8] placeholder-[#4a4f68] outline-none"
+                        spellCheck={false}
+                    />
+                    {/* Stats bar */}
+                    <div className="flex items-center justify-between border-t border-[#2a2f48] px-4 py-2">
+                        <div className="flex gap-6 text-xs tracking-wider text-[#8b8598]">
+                            <span>
+                                CHARACTERS:{" "}
+                                <span className="text-[#e2d5c8]">
+                                    {charCount}
+                                </span>
+                            </span>
+                            <span>
+                                LINES:{" "}
+                                <span className="text-[#e2d5c8]">
+                                    {lineCount}
+                                </span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Submit button */}
+                <div className="flex justify-center">
+                    <button
+                        type="submit"
+                        disabled={!content.trim() || submitting}
+                        className="flex items-center gap-2 rounded bg-[#f5c8a8] px-12 py-4 text-sm font-bold uppercase tracking-[0.2em] text-[#1a1f36] cursor-pointer transition-colors hover:bg-[#e6b896] disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                        {submitting ? "CREATING..." : "CREATE SECURE PASTE"}
+                        {!submitting && <Zap className="h-4 w-4" />}
+                    </button>
+                </div>
+            </form>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
-  );
-}
+    );
+};
+
+const Home: React.FC = () => {
+    return (
+        <Suspense
+            fallback={
+                <div className="mx-auto max-w-6xl px-6 py-10 text-center text-[#8b8598]">
+                    Loading...
+                </div>
+            }
+        >
+            <HomeForm />
+        </Suspense>
+    );
+};
+
+export default Home;

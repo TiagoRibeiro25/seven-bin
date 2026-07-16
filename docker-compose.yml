@@ -1,0 +1,16 @@
+services:
+    mongodb:
+        image: mongo
+        container_name: seven-bin-mongodb
+        restart: no
+        ports:
+            - "27017:27017"
+        environment:
+            MONGO_INITDB_ROOT_USERNAME: admin
+            MONGO_INITDB_ROOT_PASSWORD: 1234
+            MONGO_INITDB_DATABASE: seven-bin
+        volumes:
+            - mongodb_data:/data/db
+
+volumes:
+    mongodb_data:
