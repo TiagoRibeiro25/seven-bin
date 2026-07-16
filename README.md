@@ -78,6 +78,7 @@ src/
 │   └── Footer.tsx            # Site footer
 ├── lib/
 │   ├── detect-language.ts    # Keyword-based language detection
+│   ├── encryption.ts         # Encryption utilities
 │   ├── localstorage.ts       # localStorage helpers for paste IDs
 │   └── mongoose.ts           # MongoDB connection
 └── models/
@@ -86,6 +87,4 @@ src/
 
 ## Environment Variables
 
-| Variable      | Description               | Default                                                           |
-| ------------- | ------------------------- | ----------------------------------------------------------------- |
-| `MONGODB_URI` | MongoDB connection string | `mongodb://admin:1234@localhost:27017/seven-bin?authSource=admin` |
+Copy the `env.example` file to `.env` and fill in the values.

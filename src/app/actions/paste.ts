@@ -3,6 +3,7 @@
 import Paste from "@/models/Paste";
 import "@/lib/mongoose";
 import { detectLanguage } from "@/lib/detect-language";
+import { encrypt, decrypt } from "@/lib/encryption";
 
 export async function createPaste(formData: {
     title?: string;
@@ -23,7 +24,7 @@ export async function createPaste(formData: {
 
     const paste = await Paste.create({
         title,
-        content,
+        content: encrypt(content),
         language,
     });
 
@@ -43,7 +44,7 @@ export async function getPaste(id: string) {
         return {
             id: paste._id.toString(),
             title: paste.title,
-            content: paste.content,
+            content: decrypt(paste.content),
             language: paste.language,
             createdAt: paste.createdAt.toISOString(),
             expiresAt: paste.expiresAt.toISOString(),
