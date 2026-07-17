@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Database, ShieldCheck, Clock } from "lucide-react";
 import { getMyPasteIds } from "@/lib/localstorage";
 import { getPastesByIds } from "@/app/actions/paste";
 
@@ -117,37 +116,6 @@ const MyPastesPage: React.FC = () => {
                         )}
                     </tbody>
                 </table>
-            </div>
-
-            {/* Info cards */}
-            <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
-                <div className="rounded border border-[#2a2f48] bg-[#1a1f36] p-5">
-                    <p className="mb-2 text-xs font-bold uppercase tracking-wider text-[#8b8598]">
-                        Storage Engine
-                    </p>
-                    <div className="flex items-center gap-2 text-sm text-[#e2d5c8]">
-                        <Database className="h-4 w-4 text-[#e67e22]" />
-                        localStorage
-                    </div>
-                </div>
-                <div className="rounded border border-[#2a2f48] bg-[#1a1f36] p-5">
-                    <p className="mb-2 text-xs font-bold uppercase tracking-wider text-[#8b8598]">
-                        Security Protocol
-                    </p>
-                    <div className="flex items-center gap-2 text-sm text-[#e2d5c8]">
-                        <ShieldCheck className="h-4 w-4 text-[#e67e22]" />
-                        Client-Side Only
-                    </div>
-                </div>
-                <div className="rounded border border-[#2a2f48] bg-[#1a1f36] p-5">
-                    <p className="mb-2 text-xs font-bold uppercase tracking-wider text-[#8b8598]">
-                        TTL Status
-                    </p>
-                    <div className="flex items-center gap-2 text-sm text-[#e2d5c8]">
-                        <Clock className="h-4 w-4 text-[#e67e22]" />
-                        7-Day EOL
-                    </div>
-                </div>
             </div>
         </div>
     );
