@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { getMyPasteIds } from "@/lib/localstorage";
+import { getMyPasteIds, setPasteIds } from "@/lib/localstorage";
 import { getPastesByIds } from "@/app/actions/paste";
 
 interface PasteEntry {
@@ -37,6 +37,9 @@ const MyPastesPage: React.FC = () => {
             }
             const data = await getPastesByIds(ids);
             setPastes(data);
+            // Clean up stale IDs (expired or deleted pastes)
+            const validIds = data.map((p) => p.id);
+            setPasteIds(validIds);
             setLoading(false);
         };
         loadPastes();

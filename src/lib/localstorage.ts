@@ -33,3 +33,12 @@ export function removePasteId(id: string): void {
         // localStorage unavailable
     }
 }
+
+export function setPasteIds(ids: string[]): void {
+    if (typeof window === "undefined") return;
+    try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(ids));
+    } catch {
+        // localStorage unavailable
+    }
+}
