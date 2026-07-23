@@ -62,29 +62,6 @@ npm run dev
 - **My Pastes**: Your created paste IDs are stored in localStorage so you can quickly find them later
 - **Auto-deletion**: MongoDB's TTL index on `expiresAt` automatically removes pastes 7 days after creation
 
-## Project Structure
-
-```
-src/
-├── app/
-│   ├── actions/paste.ts      # Server actions (create, read)
-│   ├── paste/[id]/page.tsx   # View paste page
-│   ├── pastes/page.tsx       # My Pastes page
-│   ├── page.tsx              # Home / create paste page
-│   ├── layout.tsx            # Root layout with header/footer
-│   └── globals.css           # Global styles
-├── components/
-│   ├── Header.tsx            # Navigation header
-│   └── Footer.tsx            # Site footer
-├── lib/
-│   ├── detect-language.ts    # Keyword-based language detection
-│   ├── encryption.ts         # Encryption utilities
-│   ├── localstorage.ts       # localStorage helpers for paste IDs
-│   └── mongoose.ts           # MongoDB connection
-└── models/
-    └── Paste.ts              # Mongoose Paste schema
-```
-
 ## Environment Variables
 
 Copy the `env.example` file to `.env` and fill in the values.
